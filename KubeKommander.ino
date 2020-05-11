@@ -1,7 +1,4 @@
-/*
-    Based on Neil Kolban example for IDF: https://github.com/nkolban/esp32-snippets/blob/master/cpp_utils/tests/BLE%20Tests/SampleWrite.cpp
-    Ported to Arduino ESP32 by Evandro Copercini
-*/
+#define DEBUG 1
 
 #include <BLEDevice.h>
 #include <BLEUtils.h>
@@ -34,21 +31,50 @@ SSD1306  display(0x3c, 4, 15);
 class MyCallbacks: public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
       std::string value = pCharacteristic->getValue();
-      //Serial.print("New BLE message: ");
-      //BLEMessageRecieved = true;
-//      for (int i = 0; i < value.length(); i++) {
-//        Serial.print(value[i]);
-//      }
-//      Serial.println();
+      #ifdef DEBUG
+        Serial.print("New BLE message of len: ");
+        Serial.println(value.length());
+      #endif
+      BLEMessageRecieved = true;
+      #ifdef DEBUG2
+        for (int i = 0; i < value.length(); i++) {
+          Serial.print(value[i]);
+        }
+        Serial.println();
+      #endif
       if (value.length() == 3) {
-        //BLELEDCommandRecieved = true;
-        //Serial.println("Sending LED command");
+//        BLELEDCommandRecieved = true;
+        #ifdef DEBUG
+          Serial.println("Sending LED command");
+        #endif
         Wire.beginTransmission(SLAVE_ADDR);
         for (int i=0; i<3; i++)
         {
+          #ifdef DEBUG
+            Serial.print((byte)value[i]);
+            Serial.print(" ");
+          #endif
           Wire.write(value[i]);  //data bytes are queued in local buffer
         }
+        #ifdef DEBUG
+          Serial.println();
+        #endif
         Wire.endTransmission();
+      } else {
+        for (int i=0; i < value.length()/3; i++) {
+          Wire.beginTransmission(SLAVE_ADDR);
+          for (int j=0; j < 3; j++) {
+            Wire.write(value[i*3+j]);
+            #ifdef DEBUG2
+              Serial.print((byte)value[i*3+j]);
+              Serial.print(" ");
+            #endif
+          }
+          #ifdef DEBUG2
+            Serial.println();
+          #endif
+          Wire.endTransmission();
+        }
       }
     }
 };
@@ -88,19 +114,22 @@ void setup() {
 //  display.setFont(ArialMT_Plain_10);
 }
 void loop() {
-//  Serial.println("Sinewave");
-//  sinwaveTwo();
-//  clean();
-  if (!BLELEDCommandRecieved) {
-    Serial.println("Folder");
-    folder();
-//     Serial.println("fireworks");
-//     fireworks();
-//     Serial.println("colorwheel");
-//    color_wheelTWO();
-//    Serial.println("shake");
-//    harlem_shake();
-  }
+
+  sinwaveTwo();
+  folder();
+  fireworks();
+  color_wheelTWO();
+  harlem_shake();
+  bouncyvTwo();
+  wipe_out();
+  rain();
+  spirals();
+  tesseract();
+  glowingCube();
+  rubiksCube();
+  dancingCube();
+  displayTextRoutine();
+  dancingSphere();
 }
 /*Function that sends an LED change to the cube
 each message is 3 bytes long and looks like this
@@ -111,13 +140,15 @@ XXX = B001 is a special command meaning whole cube this color
 unsigned long sendTimer = millis();
 unsigned int commandCount = 0;
 void LED(int z,int x,int y, byte R, byte G, byte B) {
-  //useless loop to burn some time
-  unsigned long counter = 0;
-  for(int i = 0; i < 1000000; i++) {
-    for(int j = 0; j < 1000000; j++) {
-          counter++;
-    }
-  }
+//  Serial.print("{");
+//  Serial.print(z);
+//  Serial.print(",");
+//  Serial.print(x);
+//  Serial.print(",");
+//  Serial.print(y);
+//  Serial.println(",1},");
+  //delay to slow down the send rate to prevent errors
+  delayMicroseconds(75);
    //Serial.println("counter = ");
    //Serial.println(counter);
     commandCount++;
@@ -159,7 +190,60 @@ void LED(int z,int x,int y, byte R, byte G, byte B) {
     Wire.write(LEDNumber);
     Wire.endTransmission();
 }
+unsigned long truncsendTimer = millis();
+unsigned int trunccommandCount = 0;
+void LEDTruncate(int z,int x,int y, byte R, byte G, byte B) {
+//  Serial.print("{");
+//  Serial.print(z);
+//  Serial.print(",");
+//  Serial.print(x);
+//  Serial.print(",");
+//  Serial.print(y);
+//  Serial.println(",1},");
+    // First, check and make sure nothing went beyond the limits, just clamp things at either 0 or 7 for location, and 0 or 15 for brightness
+    if(z<0 || z>7 || x<0 || x>7 || y<0 || y>7)
+      return;
+    if(R<0)
+      R=0;
+    if(R>15)
+      R=15;
+    if(G<0)
+      G=0;
+    if(G>15)
+      G=15;
+    if(B<0)
+      B=0;
+    if(B>15)
+      B=15; 
+  //delay to slow down the send rate to prevent errors
+  delayMicroseconds(75);
+  trunccommandCount++;
+  if (millis() - truncsendTimer > 1000) {
+    Serial.print("Commands per second: ");
+    Serial.println(trunccommandCount);
+    trunccommandCount = 0;
+    truncsendTimer = millis();
+  } 
+    unsigned int LEDNumber = (z << 6) + (x << 3) + y;
+    Wire.beginTransmission(SLAVE_ADDR);
+    Wire.write((R << 4) + G);
+    Wire.write((B << 4) + (LEDNumber >> 8));
+    Wire.write(LEDNumber);
+    Wire.endTransmission();
+}
+unsigned long LEDNosendTimer = millis();
+unsigned int LEDNocommandCount = 0;
 void LEDNo(int LEDNumber, byte R, byte G, byte B) {
+  delayMicroseconds(75);
+ //Serial.println("counter = ");
+ //Serial.println(counter);
+  LEDNocommandCount++;
+  if (millis() - LEDNosendTimer > 1000) {
+    Serial.print("Commands per second: ");
+    Serial.println(LEDNocommandCount);
+    LEDNocommandCount = 0;
+    LEDNosendTimer = millis();
+  }
   if(LEDNumber<0)
     LEDNumber=0;
   if(LEDNumber>512)
@@ -185,6 +269,15 @@ void LEDNo(int LEDNumber, byte R, byte G, byte B) {
 unsigned long WCCsendTimer = millis();
 unsigned int WCCcommandCount = 0;
 void LEDWholeCubeChange(byte R, byte G, byte B) {
+  #ifdef DEBUG
+    Serial.print("RGB of whole cube: ");
+    Serial.print(R);
+    Serial.print(", ");
+    Serial.print(G);
+    Serial.print(", ");
+    Serial.println(B);
+  #endif
+  delayMicroseconds(75);
    if (millis() - WCCsendTimer > 1000) {
     Serial.print("WCC Commands per second: ");
     Serial.println(WCCcommandCount);
@@ -209,29 +302,13 @@ void LEDWholeCubeChange(byte R, byte G, byte B) {
   Wire.write(0);
   Wire.endTransmission();
 }
+//return 512 if x y or z out of bounds
 unsigned int getLEDNumber(unsigned int z, unsigned int x, unsigned int y) {
-  return z*64 + x*8 + y;
+  if(z<0 || z>7 || x<0 || x>7 || y<0 || y>7)
+    return 512;
+  return (z << 6) + (x << 3) + y;
 }
 void clean() {
   LEDWholeCubeChange(0,0,0);
-}
-
-void drawTextFlowDemo() {
-    display.setFont(ArialMT_Plain_10);
-    display.setTextAlignment(TEXT_ALIGN_LEFT);
-    display.drawStringMaxWidth(0, 0, 128,
-      "No BLE data recieved" );
-}
-void displayNoMessageRecieved() {
-    display.setFont(ArialMT_Plain_16);
-    display.setTextAlignment(TEXT_ALIGN_LEFT);
-    display.drawStringMaxWidth(0, 0, 128,
-      "No BLE data recieved" );
-}
-void displayRecievedMessage() {
-    display.setFont(ArialMT_Plain_16);
-    display.setTextAlignment(TEXT_ALIGN_LEFT);
-    display.drawStringMaxWidth(0, 0, 128,
-      (String)message );
 }
 
