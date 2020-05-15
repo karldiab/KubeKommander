@@ -106,7 +106,7 @@ void sinwaveTwo() { //*****sinewaveTwo*****sinewaveTwo*****sinewaveTwo*****sinew
 
     for (addr = 0; addr < 8; addr++)
       sinewavearrayOLD[addr] = sinewavearray[addr];
-    //delay(30);
+    delay(250);
 
   } //while
 
@@ -114,7 +114,7 @@ void sinwaveTwo() { //*****sinewaveTwo*****sinewaveTwo*****sinewaveTwo*****sinew
 } //SinewaveTwo
 
 void folder() { //****folder****folder****folder****folder****folder****folder****folder****folder****folder
-  Serial.println("Starting folder routine");
+
   int xx, yy, zz, pullback[16], state = 0, backorfront = 7; //backorfront 7 for back 0 for front
 
   int folderaddr[16], LED_Old[16], oldpullback[16], ranx = random(16), rany = random(16), ranz = random(16), ranselect;
@@ -618,6 +618,7 @@ void folder() { //****folder****folder****folder****folder****folder****folder**
 
   } //while
   clean();
+  delay(50);
 } //folder
 
 void color_wheelTWO() { //*****colorWheelTwo*****colorWheelTwo*****colorWheelTwo*****colorWheelTwo*****colorWheelTwo
@@ -707,6 +708,7 @@ void color_wheelTWO() { //*****colorWheelTwo*****colorWheelTwo*****colorWheelTwo
 
   } //while
   clean();
+
 } //color wheel
 
 //    Harlem Shake    Harlem Shake    Harlem Shake    Harlem Shake    Harlem Shake

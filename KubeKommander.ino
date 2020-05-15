@@ -1,4 +1,5 @@
-#define DEBUG 1
+#define DEBUG
+#include <CircularBuffer.h>
 
 #include <BLEDevice.h>
 #include <BLEUtils.h>
@@ -7,17 +8,19 @@
 #include "DefaultRoutines.h"
 #include "CustomRoutines.h"
 
+byte commandData[3];
+CircularBuffer<byte, 1024> frameBuffer[3];
+hw_timer_t * timer = NULL;
+portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
+void IRAM_ATTR onTimer();
 
+TaskHandle_t sendLEDCommands;
 
-
-// See the following for generating UUIDs:
-// https://www.uuidgenerator.net/
 
 #define SERVICE_UUID        "e9459a79-a275-41a0-be30-1d1661e784cc"
 #define CHARACTERISTIC_UUID "66495beb-4306-44a1-958d-81681776cbf1"
 //for i2c
 #define SLAVE_ADDR 9
-char message[800];
 byte command[6];
 bool BLEMessageRecieved = false;
 bool BLELEDCommandRecieved = false;
@@ -79,6 +82,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
     }
 };
 
+
 void setup() {
   Serial.begin(9600);
 
@@ -99,9 +103,26 @@ void setup() {
 
   BLEAdvertising *pAdvertising = pServer->getAdvertising();
   pAdvertising->start();
+
+  //send data timer interupt set
+//  timer = timerBegin(0, 80, true);
+//  timerAttachInterrupt(timer, &onTimer, true);
+//  timerAlarmWrite(timer, 1000000, true);
+//  //timerAlarmWrite(timer, 124, true);
+//  timerAlarmEnable(timer);
+  xTaskCreatePinnedToCore(
+    sendLEDCommandsCode, /* Function to implement the task */
+    "sendLEDCommands", /* Name of the task */
+    10000,  /* Stack size in words */
+    NULL,  /* Task input parameter */
+    0,  /* Priority of the task */
+    &sendLEDCommands,  /* Task handle. */
+    0); /* Core where the task should run */
+  
   Wire.setClock(400000);
   Wire.begin();
   Wire.setClock(400000);
+  randomSeed(analogRead(0));
   Serial.println("Ready to rock baby");
 //  // Initialising the UI will init the display too.
 //  pinMode(16,OUTPUT);
@@ -113,8 +134,26 @@ void setup() {
 //  display.flipScreenVertically();
 //  display.setFont(ArialMT_Plain_10);
 }
+#define NUMBEROFROUTINES 15
+void (*routines[NUMBEROFROUTINES])() = {
+  sinwaveTwo,
+  folder,
+  fireworks,
+  color_wheelTWO,
+  harlem_shake,
+  bouncyvTwo,
+  wipe_out,
+  rain,
+  spirals,
+  tesseract,
+  glowingCube,
+  rubiksCube,
+  dancingCube,
+  displayTextRoutine,
+  dancingSphere
+  };
 void loop() {
-
+//  (*routines[random(0,NUMBEROFROUTINES)])();
   sinwaveTwo();
   folder();
   fireworks();
@@ -131,6 +170,23 @@ void loop() {
   displayTextRoutine();
   dancingSphere();
 }
+
+void sendLEDCommandsCode( void * parameter) {
+  while (1) {
+    if (!frameBuffer[0].isEmpty()) {
+      Wire.beginTransmission(SLAVE_ADDR);
+      for (int i=0;i<3;i++) { 
+        Wire.write(frameBuffer[i].pop());
+      }
+      Wire.endTransmission();
+
+    } 
+    delayMicroseconds(100);
+  }
+}
+
+
+
 /*Function that sends an LED change to the cube
 each message is 3 bytes long and looks like this
 RRRRGGGG BBBBXXXNz NzNzNxNxNxNyNyNy
@@ -140,15 +196,8 @@ XXX = B001 is a special command meaning whole cube this color
 unsigned long sendTimer = millis();
 unsigned int commandCount = 0;
 void LED(int z,int x,int y, byte R, byte G, byte B) {
-//  Serial.print("{");
-//  Serial.print(z);
-//  Serial.print(",");
-//  Serial.print(x);
-//  Serial.print(",");
-//  Serial.print(y);
-//  Serial.println(",1},");
   //delay to slow down the send rate to prevent errors
-  delayMicroseconds(75);
+  //delayMicroseconds(500);
    //Serial.println("counter = ");
    //Serial.println(counter);
     commandCount++;
@@ -184,12 +233,19 @@ void LED(int z,int x,int y, byte R, byte G, byte B) {
     if(B>15)
       B=15;  
     unsigned int LEDNumber = (z << 6) + (x << 3) + y;
-    Wire.beginTransmission(SLAVE_ADDR);
-    Wire.write((R << 4) + G);
-    Wire.write((B << 4) + (LEDNumber >> 8));
-    Wire.write(LEDNumber);
-    Wire.endTransmission();
+//    frameBuffer[0].push((R << 4) + G);
+//    frameBuffer[1].push((B << 4) + (LEDNumber >> 8));
+//    frameBuffer[2].push(LEDNumber);
+  pushToFrameBuffer((R << 4) + G, (B << 4) + (LEDNumber >> 8), LEDNumber);
+//    Wire.beginTransmission(SLAVE_ADDR);
+//    Wire.write((R << 4) + G);
+//    Wire.write((B << 4) + (LEDNumber >> 8));
+//    Wire.write(LEDNumber);
+//    Wire.endTransmission();
 }
+
+
+
 unsigned long truncsendTimer = millis();
 unsigned int trunccommandCount = 0;
 void LEDTruncate(int z,int x,int y, byte R, byte G, byte B) {
@@ -216,7 +272,7 @@ void LEDTruncate(int z,int x,int y, byte R, byte G, byte B) {
     if(B>15)
       B=15; 
   //delay to slow down the send rate to prevent errors
-  delayMicroseconds(75);
+  //delayMicroseconds(100);
   trunccommandCount++;
   if (millis() - truncsendTimer > 1000) {
     Serial.print("Commands per second: ");
@@ -225,16 +281,20 @@ void LEDTruncate(int z,int x,int y, byte R, byte G, byte B) {
     truncsendTimer = millis();
   } 
     unsigned int LEDNumber = (z << 6) + (x << 3) + y;
-    Wire.beginTransmission(SLAVE_ADDR);
-    Wire.write((R << 4) + G);
-    Wire.write((B << 4) + (LEDNumber >> 8));
-    Wire.write(LEDNumber);
-    Wire.endTransmission();
+//    frameBuffer[0].push((R << 4) + G);
+//    frameBuffer[1].push((B << 4) + (LEDNumber >> 8));
+//    frameBuffer[2].push(LEDNumber);
+  pushToFrameBuffer((R << 4) + G, (B << 4) + (LEDNumber >> 8), LEDNumber);
+//    Wire.beginTransmission(SLAVE_ADDR);
+//    Wire.write((R << 4) + G);
+//    Wire.write((B << 4) + (LEDNumber >> 8));
+//    Wire.write(LEDNumber);
+//    Wire.endTransmission();
 }
 unsigned long LEDNosendTimer = millis();
 unsigned int LEDNocommandCount = 0;
 void LEDNo(int LEDNumber, byte R, byte G, byte B) {
-  delayMicroseconds(75);
+  //delayMicroseconds(100);
  //Serial.println("counter = ");
  //Serial.println(counter);
   LEDNocommandCount++;
@@ -260,11 +320,15 @@ void LEDNo(int LEDNumber, byte R, byte G, byte B) {
     B=0;
   if(B>15)
     B=15;  
-  Wire.beginTransmission(SLAVE_ADDR);
-  Wire.write((R << 4) + G);
-  Wire.write((B << 4) + (LEDNumber >> 8));
-  Wire.write(LEDNumber);
-  Wire.endTransmission();
+//  Wire.beginTransmission(SLAVE_ADDR);
+//  Wire.write((R << 4) + G);
+//  Wire.write((B << 4) + (LEDNumber >> 8));
+//  Wire.write(LEDNumber);
+//  Wire.endTransmission();
+  pushToFrameBuffer((R << 4) + G, (B << 4) + (LEDNumber >> 8), LEDNumber);
+//    frameBuffer[0].push((R << 4) + G);
+//    frameBuffer[1].push((B << 4) + (LEDNumber >> 8));
+//    frameBuffer[2].push(LEDNumber);
 }
 unsigned long WCCsendTimer = millis();
 unsigned int WCCcommandCount = 0;
@@ -277,7 +341,7 @@ void LEDWholeCubeChange(byte R, byte G, byte B) {
     Serial.print(", ");
     Serial.println(B);
   #endif
-  delayMicroseconds(75);
+  //delayMicroseconds(100);
    if (millis() - WCCsendTimer > 1000) {
     Serial.print("WCC Commands per second: ");
     Serial.println(WCCcommandCount);
@@ -296,11 +360,15 @@ void LEDWholeCubeChange(byte R, byte G, byte B) {
     B=0;
   if(B>15)
     B=15; 
-  Wire.beginTransmission(SLAVE_ADDR);
-  Wire.write((R << 4) + G);
-  Wire.write((B << 4) | B00000010);
-  Wire.write(0);
-  Wire.endTransmission();
+//  Wire.beginTransmission(SLAVE_ADDR);
+//  Wire.write((R << 4) + G);
+//  Wire.write((B << 4) | B00000010);
+//  Wire.write(0);
+//  Wire.endTransmission();
+  pushToFrameBuffer((R << 4) + G, (B << 4) | B00000010, 0);
+//    frameBuffer[0].push((R << 4) + G);
+//    frameBuffer[1].push((B << 4) | B00000010);
+//    frameBuffer[2].push(0);
 }
 //return 512 if x y or z out of bounds
 unsigned int getLEDNumber(unsigned int z, unsigned int x, unsigned int y) {
@@ -308,6 +376,18 @@ unsigned int getLEDNumber(unsigned int z, unsigned int x, unsigned int y) {
     return 512;
   return (z << 6) + (x << 3) + y;
 }
+void pushToFrameBuffer(byte byte1, byte byte2, byte byte3) {
+    if (!frameBuffer[0].push(byte1)) {
+      frameBuffer[0].clear();
+      frameBuffer[1].clear();
+      frameBuffer[2].clear();
+      Serial.println("Frame buffer overflow!!!");
+    }
+//    frameBuffer[0].push(byte1);
+    frameBuffer[1].push(byte2);
+    frameBuffer[2].push(byte3);
+}
+
 void clean() {
   LEDWholeCubeChange(0,0,0);
 }

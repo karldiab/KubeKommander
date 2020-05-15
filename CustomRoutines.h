@@ -1036,7 +1036,7 @@ void dancingSphere() {
   int lats = 4;
   int longs = lats;
   int delayFactor = 60;
-  int iterations = 10;
+  int iterations = 20;
   byte currentFrame[65];
   byte previousFrame[65];
   const int numberOfSphereAnimations = 4;
@@ -1046,7 +1046,7 @@ void dancingSphere() {
     sphereAnimationGrowFrom2Corners,
     sphereAnimationGrowAndShrinkFrom4Corners};
   for (int runs = 0; runs < iterations; runs++) {
-    int loops = random(1,4);
+    int loops = random(1,2);
     int animation = random(0,numberOfSphereAnimations);
     #ifdef DEBUG
       Serial.print("In dancing Sphere on run ");
