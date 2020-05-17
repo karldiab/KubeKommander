@@ -6,6 +6,7 @@
 #include <Wire.h>
 #include "DefaultRoutines.h"
 #include "CustomRoutines.h"
+#include "MusicRoutines.h"
 
 
 
@@ -16,12 +17,12 @@
 
 bool BLEMessageRecieved = false;
 bool BLELEDCommandRecieved = false;
-bool sendBufferFilled = false;
-byte sendBuffer[3];
 
 //DISPLAY STUFF
 #include "SSD1306.h" // alias for `#include "SSD1306Wire.h"`
 SSD1306  display(0x3c, 4, 15);
+
+
 
 class MyCallbacks: public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
@@ -73,10 +74,9 @@ class MyCallbacks: public BLECharacteristicCallbacks {
       }
     }
 };
-
 void setup() {
   Serial.begin(9600);
-
+  randomSeed(analogRead(0));
   BLEDevice::init("KubeKommander");
   BLEServer *pServer = BLEDevice::createServer();
   BLEService *pService = pServer->createService(SERVICE_UUID);
@@ -107,22 +107,41 @@ void setup() {
 //  display.flipScreenVertically();
 //  display.setFont(ArialMT_Plain_10);
 }
+#define NUMBEROFROUTINES 15
+void (*routines[NUMBEROFROUTINES])() = {
+  sinwaveTwo,
+  folder,
+  fireworks,
+  color_wheelTWO,
+  harlem_shake,
+  bouncyvTwo,
+  wipe_out,
+  rain,
+  spirals,
+  tesseract,
+  glowingCube,
+  rubiksCube,
+  dancingCube,
+  displayTextRoutine,
+  dancingSphere
+};
 void loop() {
-  sinwaveTwo();
-  folder();
-  fireworks();
-  color_wheelTWO();
-  harlem_shake();
-  bouncyvTwo();
-  wipe_out();
-  rain();
-  spirals();
-  tesseract();
-  glowingCube();
-  rubiksCube();
-  dancingCube();
-  displayTextRoutine();
-  dancingSphere();
+  (*routines[random(0,NUMBEROFROUTINES)])();
+//  sinwaveTwo();
+//  folder();
+//  fireworks();
+//  color_wheelTWO();
+//  harlem_shake();
+//  bouncyvTwo();
+//  wipe_out();
+//  rain();
+//  spirals();
+//  tesseract();
+//  glowingCube();
+//  rubiksCube();
+//  dancingCube();
+//  displayTextRoutine();
+//  dancingSphere();
 }
 /*Function that sends an LED change to the cube
 each message is 3 bytes long and looks like this
