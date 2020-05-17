@@ -126,7 +126,9 @@ void (*routines[NUMBEROFROUTINES])() = {
   dancingSphere
 };
 void loop() {
+  clean();
   (*routines[random(0,NUMBEROFROUTINES)])();
+  clean();
 //  sinwaveTwo();
 //  folder();
 //  fireworks();
