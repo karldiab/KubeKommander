@@ -1600,5 +1600,5 @@ void wipe_out(){//*****wipe_out*****wipe_out*****wipe_out*****wipe_out*****wipe_
   for(zzz=0; zzz<8; zzz++){
   LED(xxx, yyy, zzz, 0, 0, 0);
   }}}
-  
+  clean();
 }//wipeout

@@ -9,16 +9,11 @@
 
 
 
-
-// See the following for generating UUIDs:
-// https://www.uuidgenerator.net/
-
 #define SERVICE_UUID        "e9459a79-a275-41a0-be30-1d1661e784cc"
 #define CHARACTERISTIC_UUID "66495beb-4306-44a1-958d-81681776cbf1"
 //for i2c
 #define SLAVE_ADDR 9
-char message[800];
-byte command[6];
+
 bool BLEMessageRecieved = false;
 bool BLELEDCommandRecieved = false;
 bool sendBufferFilled = false;
@@ -99,7 +94,6 @@ void setup() {
 
   BLEAdvertising *pAdvertising = pServer->getAdvertising();
   pAdvertising->start();
-  Wire.setClock(400000);
   Wire.begin();
   Wire.setClock(400000);
   Serial.println("Ready to rock baby");
@@ -114,7 +108,6 @@ void setup() {
 //  display.setFont(ArialMT_Plain_10);
 }
 void loop() {
-
   sinwaveTwo();
   folder();
   fireworks();
@@ -140,21 +133,14 @@ XXX = B001 is a special command meaning whole cube this color
 unsigned long sendTimer = millis();
 unsigned int commandCount = 0;
 void LED(int z,int x,int y, byte R, byte G, byte B) {
-//  Serial.print("{");
-//  Serial.print(z);
-//  Serial.print(",");
-//  Serial.print(x);
-//  Serial.print(",");
-//  Serial.print(y);
-//  Serial.println(",1},");
   //delay to slow down the send rate to prevent errors
-  delayMicroseconds(75);
+  //delayMicroseconds(75);
    //Serial.println("counter = ");
    //Serial.println(counter);
     commandCount++;
-    if (millis() - sendTimer > 1000) {
-      Serial.print("Commands per second: ");
-      Serial.println(commandCount);
+    if (millis() - sendTimer > 100) {
+      Serial.print("LED Commands per second: ");
+      Serial.println(commandCount*10);
       commandCount = 0;
       sendTimer = millis();
     }
@@ -216,11 +202,11 @@ void LEDTruncate(int z,int x,int y, byte R, byte G, byte B) {
     if(B>15)
       B=15; 
   //delay to slow down the send rate to prevent errors
-  delayMicroseconds(75);
+  //delayMicroseconds(75);
   trunccommandCount++;
-  if (millis() - truncsendTimer > 1000) {
-    Serial.print("Commands per second: ");
-    Serial.println(trunccommandCount);
+  if (millis() - truncsendTimer > 100) {
+    Serial.print("LEDTruncate Commands per second: ");
+    Serial.println(trunccommandCount*10);
     trunccommandCount = 0;
     truncsendTimer = millis();
   } 
@@ -234,13 +220,13 @@ void LEDTruncate(int z,int x,int y, byte R, byte G, byte B) {
 unsigned long LEDNosendTimer = millis();
 unsigned int LEDNocommandCount = 0;
 void LEDNo(int LEDNumber, byte R, byte G, byte B) {
-  delayMicroseconds(75);
+  //delayMicroseconds(75);
  //Serial.println("counter = ");
  //Serial.println(counter);
   LEDNocommandCount++;
-  if (millis() - LEDNosendTimer > 1000) {
-    Serial.print("Commands per second: ");
-    Serial.println(LEDNocommandCount);
+  if (millis() - LEDNosendTimer > 100) {
+    Serial.print("LEDNo Commands per second: ");
+    Serial.println(LEDNocommandCount*10);
     LEDNocommandCount = 0;
     LEDNosendTimer = millis();
   }
@@ -269,7 +255,7 @@ void LEDNo(int LEDNumber, byte R, byte G, byte B) {
 unsigned long WCCsendTimer = millis();
 unsigned int WCCcommandCount = 0;
 void LEDWholeCubeChange(byte R, byte G, byte B) {
-  #ifdef DEBUG
+  #ifdef DEBUG2
     Serial.print("RGB of whole cube: ");
     Serial.print(R);
     Serial.print(", ");
@@ -277,7 +263,8 @@ void LEDWholeCubeChange(byte R, byte G, byte B) {
     Serial.print(", ");
     Serial.println(B);
   #endif
-  delayMicroseconds(75);
+  WCCcommandCount++;
+  //delayMicroseconds(75);
    if (millis() - WCCsendTimer > 1000) {
     Serial.print("WCC Commands per second: ");
     Serial.println(WCCcommandCount);
