@@ -359,10 +359,21 @@ void musicSlinky() {
     }
     delay(staticDelayFactor);
   }
+  //second check to ensure we're not too fast
+  if (newSync) {
+    newSync = false;
+    delayFactor = 60000/currentBPM - (millis() - lastBeatSync);
+  } else {
+    delayFactor =  60000/currentBPM - (millis() - lastBeatDisplayed);
+  }
+  #ifdef DEBUG2
+    Serial.print("delayFactor: ");
+    Serial.println(delayFactor);
+  #endif
+  if (delayFactor > 0) {
+    delay(delayFactor);
+  } 
   #ifdef DEBUG
-  Serial.print("Took this many ms to get here: ");
-  Serial.println(millis() - startTime);
-  startTime = millis();
     Serial.print("Current on beat display bpm: ");
     Serial.println((int)(60000/(millis() - lastBeatDisplayed) + 0.5));
   #endif
