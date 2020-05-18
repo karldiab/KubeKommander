@@ -1,9 +1,28 @@
 #define DEBUG 1
 
 #include <BLEDevice.h>
+//BLE command stuff
+#define NORMALMODE 0
+#define MUSICMODE 1
+#define SLAVEMODE 2
+
+#define YPLAIN 1
+#define XPLAIN 2
+#define ZPLAIN 3
+byte displayMode = MUSICMODE;
+bool BLEMessageRecieved = false;
+bool BLELEDCommandRecieved = false;
 #include <BLEUtils.h>
 #include <BLEServer.h>
 #include <Wire.h>
+void LEDPlainChange(byte whichPlain, byte level, byte R, byte G, byte B);
+void LED(int z, int x, int y, byte R, byte G, byte B);
+void LEDTruncate(int z, int x, int y, byte R, byte G, byte B);
+void LEDNo(int LEDNumber, byte R, byte G, byte B);
+void LEDWholeCubeChange(byte R, byte G, byte B);
+unsigned int getLEDNumber(unsigned int z, unsigned int x, unsigned int y);
+void clean();
+unsigned long start; //for a millis timer to cycle through the animations
 #include "DefaultRoutines.h"
 #include "CustomRoutines.h"
 #include "MusicRoutines.h"
@@ -15,13 +34,9 @@
 //for i2c
 #define SLAVE_ADDR 9
 
-bool BLEMessageRecieved = false;
-bool BLELEDCommandRecieved = false;
-
 //DISPLAY STUFF
 #include "SSD1306.h" // alias for `#include "SSD1306Wire.h"`
 SSD1306  display(0x3c, 4, 15);
-
 
 
 class MyCallbacks: public BLECharacteristicCallbacks {
@@ -75,7 +90,7 @@ class MyCallbacks: public BLECharacteristicCallbacks {
     }
 };
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   randomSeed(analogRead(0));
   BLEDevice::init("KubeKommander");
   BLEServer *pServer = BLEDevice::createServer();
@@ -126,9 +141,24 @@ void (*routines[NUMBEROFROUTINES])() = {
   dancingSphere
 };
 void loop() {
-  clean();
-  (*routines[random(0,NUMBEROFROUTINES)])();
-  clean();
+  switch (displayMode) {
+    case NORMALMODE:
+      clean();
+      (*routines[random(0,NUMBEROFROUTINES)])();
+      clean();
+    break;
+    case MUSICMODE:
+      clean();
+      musicModeLoop();
+      clean();
+    break;
+    case SLAVEMODE:
+      return;
+    break;
+  }
+//  clean();
+//  (*routines[random(0,NUMBEROFROUTINES)])();
+//  clean();
 //  sinwaveTwo();
 //  folder();
 //  fireworks();
@@ -158,6 +188,7 @@ void LED(int z,int x,int y, byte R, byte G, byte B) {
   //delayMicroseconds(75);
    //Serial.println("counter = ");
    //Serial.println(counter);
+  #ifdef DEBUG2
     commandCount++;
     if (millis() - sendTimer > 100) {
       Serial.print("LED Commands per second: ");
@@ -165,6 +196,7 @@ void LED(int z,int x,int y, byte R, byte G, byte B) {
       commandCount = 0;
       sendTimer = millis();
     }
+  #endif
     // First, check and make sure nothing went beyond the limits, just clamp things at either 0 or 7 for location, and 0 or 15 for brightness
     if(z<0)
       z=0;
@@ -244,13 +276,15 @@ void LEDNo(int LEDNumber, byte R, byte G, byte B) {
   //delayMicroseconds(75);
  //Serial.println("counter = ");
  //Serial.println(counter);
-  LEDNocommandCount++;
-  if (millis() - LEDNosendTimer > 100) {
-    Serial.print("LEDNo Commands per second: ");
-    Serial.println(LEDNocommandCount*10);
-    LEDNocommandCount = 0;
-    LEDNosendTimer = millis();
-  }
+  #ifdef DEBUG2
+    LEDNocommandCount++;
+    if (millis() - LEDNosendTimer > 100) {
+      Serial.print("LEDNo Commands per second: ");
+      Serial.println(LEDNocommandCount*10);
+      LEDNocommandCount = 0;
+      LEDNosendTimer = millis();
+    }
+  #endif
   if(LEDNumber<0)
     LEDNumber=0;
   if(LEDNumber>512)
@@ -308,6 +342,31 @@ void LEDWholeCubeChange(byte R, byte G, byte B) {
   Wire.write((R << 4) + G);
   Wire.write((B << 4) | B00000010);
   Wire.write(0);
+  Wire.endTransmission();
+}
+void LEDPlainChange(byte whichPlain, byte level, byte R, byte G, byte B) {
+  if (whichPlain == 0 || whichPlain > 3)
+    return;
+  if(level<0)
+    level=0;
+  if(level>7)
+    level=7;
+  if(R<0)
+    R=0;
+  if(R>15)
+    R=15;
+  if(G<0)
+    G=0;
+  if(G>15)
+    G=15;
+  if(B<0)
+    B=0;
+  if(B>15)
+    B=15; 
+  Wire.beginTransmission(SLAVE_ADDR);
+  Wire.write((R << 4) + G);
+  Wire.write((B << 4) | (B00001000 + (whichPlain << 1)));
+  Wire.write(level);
   Wire.endTransmission();
 }
 //return 512 if x y or z out of bounds

@@ -1,8 +1,3 @@
-void LED(int z, int x, int y, byte R, byte G, byte B);
-void LEDTruncate(int z, int x, int y, byte R, byte G, byte B);
-void LEDNo(int LEDNumber, byte R, byte G, byte B);
-unsigned int getLEDNumber(unsigned int z, unsigned int x, unsigned int y);
-void clean();
 #include "RoutineData.h"
 #include "MatrixMathFunctions.h"
 #include "HelperFunctions.h"

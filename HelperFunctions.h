@@ -584,3 +584,14 @@ void displayScrollingRandomText() {
 }
 // END FUNCTIONS FOR TEXT ROUTINE
 
+// MUSIC BASS SPHERE
+void drawTinyCenterCube(byte red, byte green, byte blue) {
+  LED (3,3,3,red,green,blue);
+  LED (3,3,4,red,green,blue);
+  LED (3,4,3,red,green,blue);
+  LED (3,4,4,red,green,blue);
+  LED (4,3,3,red,green,blue);
+  LED (4,3,4,red,green,blue);
+  LED (4,4,3,red,green,blue);
+  LED (4,4,4,red,green,blue);
+}

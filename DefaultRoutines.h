@@ -1,8 +1,3 @@
-unsigned long start; //for a millis timer to cycle through the animations
-void LED(int z, int x, int y, byte R, byte G, byte B);
-void LEDNo(int LEDNumber, byte R, byte G, byte B);
-void clean();
-
 void sinwaveTwo() { //*****sinewaveTwo*****sinewaveTwo*****sinewaveTwo*****sinewaveTwo*****sinewaveTwo*****sinewaveTwo
   int sinewavearray[8], addr, sinemult[8], colselect, rr = 0, gg = 0, bb = 15, addrt;
   int sinewavearrayOLD[8], select, subZ = -7, subT = 7, multi = 0; //random(-1, 2);
