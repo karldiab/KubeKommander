@@ -151,27 +151,26 @@ void setup() {
   //timerAlarmWrite(timer, 124, true);
   timerAlarmEnable(timer);
 }
-#define NUMBEROFROUTINES 19
+#define NUMBEROFROUTINES 18
 void (*routines[NUMBEROFROUTINES])() = {
-  sinwaveTwo,
-  folder,
+  sinwaveTwo, //0
+  folder, //1
   fireworks,
   color_wheelTWO,
   harlem_shake,
-  bouncyvTwo,
+  bouncyvTwo, //5
   wipe_out,
   rain,
   spirals,
   tesseract,
-  glowingCube,
+  glowingCube, //10
   rubiksCube,
   dancingCube,
   displayTextRoutine,
   dancingSphere,
-  snakes,
-  upDown,
-  square_frame_centre,
-  wave
+  upDown, //15
+  square_frame_centre, //16
+  wave //17
 };
 void loop() {
 //  switch (displayMode) {
@@ -189,11 +188,18 @@ void loop() {
 //      return;
 //    break;
 //  }
+  int nextRoutine = random(0,NUMBEROFROUTINES);
   clean();
-  (*routines[random(0,NUMBEROFROUTINES)])();
+  #ifdef DEBUG
+    Serial.print("Starting routine ");
+    Serial.print(nextRoutine);
+    Serial.print(". Total runtime: ");
+    Serial.print(millis()/1000);
+    Serial.println("s.");
+  #endif
+  (*routines[nextRoutine])();
   clean();
   delay(50);
-//  snakes();
 //  sinwaveTwo();
 //  folder();
 //  fireworks();
@@ -228,9 +234,9 @@ void LED(int z,int x,int y, byte R, byte G, byte B) {
    //Serial.println(counter);
   #ifdef DEBUG
     commandCount++;
-    if (millis() - sendTimer > 100) {
+    if (millis() - sendTimer > 10000) {
       Serial.print("LED Commands per second: ");
-      Serial.println(commandCount*10);
+      Serial.println(commandCount/10);
       commandCount = 0;
       sendTimer = millis();
     }
@@ -270,13 +276,6 @@ void LED(int z,int x,int y, byte R, byte G, byte B) {
 unsigned long truncsendTimer = millis();
 unsigned int trunccommandCount = 0;
 void LEDTruncate(int z,int x,int y, byte R, byte G, byte B) {
-//  Serial.print("{");
-//  Serial.print(z);
-//  Serial.print(",");
-//  Serial.print(x);
-//  Serial.print(",");
-//  Serial.print(y);
-//  Serial.println(",1},");
     // First, check and make sure nothing went beyond the limits, just clamp things at either 0 or 7 for location, and 0 or 15 for brightness
     if(z<0 || z>7 || x<0 || x>7 || y<0 || y>7)
       return;
@@ -295,9 +294,9 @@ void LEDTruncate(int z,int x,int y, byte R, byte G, byte B) {
   //delay to slow down the send rate to prevent errors
   //delayMicroseconds(75);
   trunccommandCount++;
-  if (millis() - truncsendTimer > 100) {
+  if (millis() - truncsendTimer > 10000) {
     Serial.print("LEDTruncate Commands per second: ");
-    Serial.println(trunccommandCount*10);
+    Serial.println(trunccommandCount/10);
     trunccommandCount = 0;
     truncsendTimer = millis();
   } 
@@ -316,9 +315,9 @@ void LEDNo(int LEDNumber, byte R, byte G, byte B) {
  //Serial.println(counter);
   #ifdef DEBUG
     LEDNocommandCount++;
-    if (millis() - LEDNosendTimer > 100) {
+    if (millis() - LEDNosendTimer > 10000) {
       Serial.print("LEDNo Commands per second: ");
-      Serial.println(LEDNocommandCount*10);
+      Serial.println(LEDNocommandCount/10);
       LEDNocommandCount = 0;
       LEDNosendTimer = millis();
     }
@@ -355,15 +354,15 @@ void LEDWholeCubeChange(byte R, byte G, byte B) {
     Serial.print(G);
     Serial.print(", ");
     Serial.println(B);
+    WCCcommandCount++;
+    //delayMicroseconds(75);
+     if (millis() - WCCsendTimer > 1000) {
+      Serial.print("WCC Commands per second: ");
+      Serial.println(WCCcommandCount);
+      WCCcommandCount = 0;
+      WCCsendTimer = millis();
+    }
   #endif
-  WCCcommandCount++;
-  //delayMicroseconds(75);
-   if (millis() - WCCsendTimer > 1000) {
-    Serial.print("WCC Commands per second: ");
-    Serial.println(WCCcommandCount);
-    WCCcommandCount = 0;
-    WCCsendTimer = millis();
-  }
   if(R<0)
     R=0;
   if(R>15)
@@ -419,7 +418,7 @@ void shift_all_layers(int8_t layerShift){
   Wire.beginTransmission(SLAVE_ADDR);
   Wire.write(0);
   Wire.write(B00000110);
-  Wire.write((byte)layerShift);
+  Wire.write(layerShift);
   Wire.endTransmission();
 }// end shift_all_layers
 

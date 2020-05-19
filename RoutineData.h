@@ -1,5 +1,6 @@
 #include "ASCIICharsin8x8.h"
 
+
 //GENERAL
 #define numberOfColorSets 5
 const int colorSets[numberOfColorSets][8][3] PROGMEM = {

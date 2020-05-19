@@ -690,7 +690,7 @@ void dancingSphere() {
   for (int runs = 0; runs < iterations; runs++) {
     int loops = random(1,4);
     int animation = random(0,numberOfSphereAnimations);
-    #ifdef DEBUG
+    #ifdef DEBUG2
       Serial.print("In dancing Sphere on run ");
       Serial.print(runs);
       Serial.print(" running animation ");
