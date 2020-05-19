@@ -1,5 +1,4 @@
 #define DEBUG 1
-
 #include <BLEDevice.h>
 //BLE command stuff
 #define NORMALMODE 0
@@ -12,6 +11,8 @@
 byte displayMode = MUSICMODE;
 bool BLEMessageRecieved = false;
 bool BLELEDCommandRecieved = false;
+
+
 #include <BLEUtils.h>
 #include <BLEServer.h>
 #include <Wire.h>
@@ -20,9 +21,12 @@ void LED(int z, int x, int y, byte R, byte G, byte B);
 void LEDTruncate(int z, int x, int y, byte R, byte G, byte B);
 void LEDNo(int LEDNumber, byte R, byte G, byte B);
 void LEDWholeCubeChange(byte R, byte G, byte B);
+void shift_all_layers(int8_t layerShift);
 unsigned int getLEDNumber(unsigned int z, unsigned int x, unsigned int y);
 void clean();
 unsigned long start; //for a millis timer to cycle through the animations
+int globalRed, globalGreen, globalBlue;
+
 #include "DefaultRoutines.h"
 #include "CustomRoutines.h"
 #include "MusicRoutines.h"
@@ -37,6 +41,11 @@ unsigned long start; //for a millis timer to cycle through the animations
 //DISPLAY STUFF
 #include "SSD1306.h" // alias for `#include "SSD1306Wire.h"`
 SSD1306  display(0x3c, 4, 15);
+
+//hardware timer interrupt
+hw_timer_t * timer = NULL;
+portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
+void IRAM_ATTR onTimer();
 
 
 class MyCallbacks: public BLECharacteristicCallbacks {
@@ -89,6 +98,19 @@ class MyCallbacks: public BLECharacteristicCallbacks {
       }
     }
 };
+
+//timer interrupt function
+void IRAM_ATTR onTimer() { 
+  currentBPM = 128;
+  currentMusicRoutine = random(3);
+  //unsigned long lastBeatDisplayed = 0;
+  //unsigned long lastBeatSync;
+  //bool newSync = false;
+  musicRedValue = random(16);
+  musicGreenValue = random(16);
+  musicBlueValue = random(16);
+}
+
 void setup() {
   Serial.begin(115200);
   randomSeed(analogRead(0));
@@ -121,8 +143,15 @@ void setup() {
 //
 //  display.flipScreenVertically();
 //  display.setFont(ArialMT_Plain_10);
+  //timer interupt setup
+  timer = timerBegin(0, 80, true);
+  timerAttachInterrupt(timer, &onTimer, true);
+  //interrupt every 5 seconds
+  timerAlarmWrite(timer, 5000000, true);
+  //timerAlarmWrite(timer, 124, true);
+  timerAlarmEnable(timer);
 }
-#define NUMBEROFROUTINES 15
+#define NUMBEROFROUTINES 19
 void (*routines[NUMBEROFROUTINES])() = {
   sinwaveTwo,
   folder,
@@ -138,27 +167,33 @@ void (*routines[NUMBEROFROUTINES])() = {
   rubiksCube,
   dancingCube,
   displayTextRoutine,
-  dancingSphere
+  dancingSphere,
+  snakes,
+  upDown,
+  square_frame_centre,
+  wave
 };
 void loop() {
-  switch (displayMode) {
-    case NORMALMODE:
-      clean();
-      (*routines[random(0,NUMBEROFROUTINES)])();
-      clean();
-    break;
-    case MUSICMODE:
-      clean();
-      musicModeLoop();
-      clean();
-    break;
-    case SLAVEMODE:
-      return;
-    break;
-  }
-//  clean();
-//  (*routines[random(0,NUMBEROFROUTINES)])();
-//  clean();
+//  switch (displayMode) {
+//    case NORMALMODE:
+//      clean();
+//      (*routines[random(0,NUMBEROFROUTINES)])();
+//      clean();
+//    break;
+//    case MUSICMODE:
+//      clean();
+//      musicModeLoop();
+//      clean();
+//    break;
+//    case SLAVEMODE:
+//      return;
+//    break;
+//  }
+  clean();
+  (*routines[random(0,NUMBEROFROUTINES)])();
+  clean();
+  delay(50);
+//  snakes();
 //  sinwaveTwo();
 //  folder();
 //  fireworks();
@@ -174,6 +209,9 @@ void loop() {
 //  dancingCube();
 //  displayTextRoutine();
 //  dancingSphere();
+//  upDown ();
+//  square_frame_centre();
+//  wave();
 }
 /*Function that sends an LED change to the cube
 each message is 3 bytes long and looks like this
@@ -188,7 +226,7 @@ void LED(int z,int x,int y, byte R, byte G, byte B) {
   //delayMicroseconds(75);
    //Serial.println("counter = ");
    //Serial.println(counter);
-  #ifdef DEBUG2
+  #ifdef DEBUG
     commandCount++;
     if (millis() - sendTimer > 100) {
       Serial.print("LED Commands per second: ");
@@ -276,7 +314,7 @@ void LEDNo(int LEDNumber, byte R, byte G, byte B) {
   //delayMicroseconds(75);
  //Serial.println("counter = ");
  //Serial.println(counter);
-  #ifdef DEBUG2
+  #ifdef DEBUG
     LEDNocommandCount++;
     if (millis() - LEDNosendTimer > 100) {
       Serial.print("LEDNo Commands per second: ");
@@ -375,6 +413,16 @@ unsigned int getLEDNumber(unsigned int z, unsigned int x, unsigned int y) {
     return 512;
   return (z << 6) + (x << 3) + y;
 }
+
+
+void shift_all_layers(int8_t layerShift){
+  Wire.beginTransmission(SLAVE_ADDR);
+  Wire.write(0);
+  Wire.write(B00000110);
+  Wire.write((byte)layerShift);
+  Wire.endTransmission();
+}// end shift_all_layers
+
 void clean() {
   LEDWholeCubeChange(0,0,0);
 }

@@ -10,9 +10,9 @@ byte currentMusicRoutine = 3;
 unsigned long lastBeatDisplayed = 0;
 unsigned long lastBeatSync;
 bool newSync = false;
-byte red = 7;
-byte green = 15;
-byte blue = 15;
+byte musicRedValue = 7;
+byte musicGreenValue = 15;
+byte musicBlueValue = 15;
 
 
 
@@ -30,7 +30,7 @@ void flashToBeat() {
   if (delayFactor > 0) {
     delay(delayFactor);
   } 
-  LEDWholeCubeChange(red,green,blue);
+  LEDWholeCubeChange(musicRedValue,musicGreenValue,musicBlueValue);
   #ifdef DEBUG
     Serial.print("Current display bpm: ");
     Serial.print((int)(60000/(millis() - lastBeatDisplayed) + 0.5));
@@ -47,7 +47,7 @@ void bassSphere() {
   byte previousFrame[65];
   int staticDelayFactor = 12;
   int delayFactor;
-  drawTinyCenterCube(red, green, blue);
+  drawTinyCenterCube(musicRedValue, musicGreenValue, musicBlueValue);
   clearBytePointArray((byte*)currentFrame);
   calculateSphere(2, 3.5,3.5,3.5, lats*2, longs*2, (byte*)currentFrame);
   //takes about 117 ms to get to beat frame
@@ -64,13 +64,13 @@ void bassSphere() {
   if (delayFactor > 0) {
     delay(delayFactor);
   } 
-  drawBytePointArray((byte*)currentFrame, red,green,blue);
+  drawBytePointArray((byte*)currentFrame, musicRedValue,musicGreenValue,musicBlueValue);
   drawTinyCenterCube(0,0,0);
   delay(staticDelayFactor);
   for (int i = 3; i < 5; i++) {
     clearBytePointArray((byte*)currentFrame);
     calculateSphere(i, 3.5,3.5,3.5, lats*i, longs*(i), (byte*)currentFrame);
-    drawBytePointArray((byte*)currentFrame, red,green,blue);
+    drawBytePointArray((byte*)currentFrame, musicRedValue,musicGreenValue,musicBlueValue);
     if (i == 4) {
       #ifdef DEBUG
         Serial.print("Current display bpm: ");
@@ -85,7 +85,7 @@ void bassSphere() {
   for (int i = 3; i >= 2; i--) {
     clearBytePointArray((byte*)currentFrame);
     calculateSphere(i, 3.5,3.5,3.5, lats*i, longs*i, (byte*)currentFrame);
-    drawBytePointArray((byte*)currentFrame, red,green,blue);
+    drawBytePointArray((byte*)currentFrame, musicRedValue,musicGreenValue,musicBlueValue);
     drawBytePointArray((byte*)previousFrame, 0,0,0);
     copyBytePointArray((byte*)currentFrame, (byte*)previousFrame);
     delay(staticDelayFactor);
@@ -95,8 +95,8 @@ void bassSphere() {
 void plainClap(int whichPlain) {
   int delayFactor;
   int staticDelayFactor = 40;
-  LEDPlainChange(whichPlain, 0, red,green,blue);
-  LEDPlainChange(whichPlain, 7, red,green,blue);
+  LEDPlainChange(whichPlain, 0, musicRedValue,musicGreenValue,musicBlueValue);
+  LEDPlainChange(whichPlain, 7, musicRedValue,musicGreenValue,musicBlueValue);
   //takes 82 ms to get beat without delayFactor
   if (newSync) {
     newSync = false;
@@ -107,14 +107,14 @@ void plainClap(int whichPlain) {
   if (delayFactor > 0) {
     delay(delayFactor);
   } 
-  LEDPlainChange(whichPlain, 1, red,green,blue);
-  LEDPlainChange(whichPlain, 6, red,green,blue);
+  LEDPlainChange(whichPlain, 1, musicRedValue,musicGreenValue,musicBlueValue);
+  LEDPlainChange(whichPlain, 6, musicRedValue,musicGreenValue,musicBlueValue);
   delay(staticDelayFactor);
-  LEDPlainChange(whichPlain, 2, red,green,blue);
-  LEDPlainChange(whichPlain, 5, red,green,blue);
+  LEDPlainChange(whichPlain, 2, musicRedValue,musicGreenValue,musicBlueValue);
+  LEDPlainChange(whichPlain, 5, musicRedValue,musicGreenValue,musicBlueValue);
   delay(staticDelayFactor);
-  LEDPlainChange(whichPlain, 3, red,green,blue);
-  LEDPlainChange(whichPlain, 4, red,green,blue);
+  LEDPlainChange(whichPlain, 3, musicRedValue,musicGreenValue,musicBlueValue);
+  LEDPlainChange(whichPlain, 4, musicRedValue,musicGreenValue,musicBlueValue);
   #ifdef DEBUG
     Serial.print("Current display bpm: ");
     Serial.print((int)(60000/(millis() - lastBeatDisplayed) + 0.5));
@@ -177,7 +177,7 @@ void musicSlinky() {
   bool swapX, swapY, swapZ, invertX, invertY, invertZ, doubleShift;
   byte R, G, B;
   if (musicSlinkyReverse) {
-    R = red, G = green, B = blue;
+    R = musicRedValue, G = musicGreenValue, B = musicBlueValue;
   } else {
     R = 0, G = 0, B = 0;
   }
