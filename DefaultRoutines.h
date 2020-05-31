@@ -1,8 +1,3 @@
-unsigned long start; //for a millis timer to cycle through the animations
-void LED(int z, int x, int y, byte R, byte G, byte B);
-void LEDNo(int LEDNumber, byte R, byte G, byte B);
-void clean();
-
 void sinwaveTwo() { //*****sinewaveTwo*****sinewaveTwo*****sinewaveTwo*****sinewaveTwo*****sinewaveTwo*****sinewaveTwo
   int sinewavearray[8], addr, sinemult[8], colselect, rr = 0, gg = 0, bb = 15, addrt;
   int sinewavearrayOLD[8], select, subZ = -7, subT = 7, multi = 0; //random(-1, 2);
@@ -1600,5 +1595,340 @@ void wipe_out(){//*****wipe_out*****wipe_out*****wipe_out*****wipe_out*****wipe_
   for(zzz=0; zzz<8; zzz++){
   LED(xxx, yyy, zzz, 0, 0, 0);
   }}}
-  
+  clean();
 }//wipeout
+
+
+
+
+
+void upDown (){
+  uint8_t iterations = 100;
+  unsigned int fillArray[64];
+  unsigned int gArray[8] = {15, 13, 11, 9, 7, 5, 3, 0};
+  unsigned int bArray[8] = {0, 3, 5, 7, 9, 11, 13, 15};
+  
+  for (int i=0;i<64;i++){
+    int x = random(2);
+      if (x==1){
+        fillArray[i] = 7;}
+      else {
+        fillArray[i] = 0;}
+    } // end i
+  
+    for (int j=0;j<64;j++){  // randon fill top and bottom layer
+      int r = j / 8;
+      int c = j - (r * 8);
+      LED (fillArray[j] ,r , c , 0, gArray[fillArray[j]], bArray[fillArray[j]]);
+    }  // end j
+    
+  for (int reps=0;reps<iterations;reps++){
+    int x = random(64);
+    int r = x / 8;
+    int c = x - (r * 8);
+    
+    if (fillArray[x] == 0){
+     for (int k=1;k<8;k++){
+       LED (k-1, r , c  , 0,0,0);   
+       LED (k, r , c  , 0, gArray[k], bArray[k]);
+          delay (25);
+      }
+    } 
+    else {
+      for (int k=6;k>=0;k--){
+       LED (k+1, r , c  , 0,0,0);   
+       LED (k, r , c  , 0, gArray[k], bArray[k]);
+       delay (25);
+      }
+    }  // end else  
+    }  // end reps
+  clean();  
+} // end upDown
+
+
+
+void draw_frame(int xx, int aa, int bb){
+  LED(xx,aa,aa,random(16),random(16),random(16));
+  LED(aa,xx,aa,random(16),random(16),random(16));
+  LED(aa,aa,xx,random(16),random(16),random(16));
+      
+  LED(xx,bb,bb,random(16),random(16),random(16));
+  LED(bb,xx,bb,random(16),random(16),random(16));
+  LED(bb,bb,xx,random(16),random(16),random(16));
+      
+  LED(xx,aa,bb,random(16),random(16),random(16));
+  LED(aa,xx,bb,random(16),random(16),random(16));
+  LED(aa,bb,xx,random(16),random(16),random(16));
+      
+  LED(xx,bb,aa,random(16),random(16),random(16));
+  LED(bb,xx,aa,random(16),random(16),random(16));
+  LED(bb,aa,xx,random(16),random(16),random(16)); 
+}// End draw_frame
+
+void clean_frame(int xxx, int aaa, int bbb){
+  LED(xxx,aaa,aaa,0,0,0);
+  LED(aaa,xxx,aaa,0,0,0);
+  LED(aaa,aaa,xxx,0,0,0);
+      
+  LED(xxx,bbb,bbb,0,0,0);
+  LED(bbb,xxx,bbb,0,0,0);
+  LED(bbb,bbb,xxx,0,0,0);
+      
+  LED(xxx,aaa,bbb,0,0,0);
+  LED(aaa,xxx,bbb,0,0,0);
+  LED(aaa,bbb,xxx,0,0,0);
+      
+  LED(xxx,bbb,aaa,0,0,0);
+  LED(bbb,xxx,aaa,0,0,0);
+  LED(bbb,aaa,xxx,0,0,0); 
+}// End draw_frame
+
+
+
+void skip(){
+  LED(1,7,5,0,15,0);
+  LED(1,7,4,0,15,0);
+  LED(2,7,4,0,15,0);
+  LED(2,7,3,0,15,0);
+  LED(3,7,3,0,15,0);
+  LED(3,7,2,0,15,0);
+  LED(4,7,3,0,15,0);
+  LED(4,7,2,0,15,0);
+  LED(5,7,3,0,15,0);
+  LED(5,7,4,0,15,0);
+  LED(6,7,4,0,15,0);
+  LED(6,7,5,0,15,0);
+}  //End Skip
+
+void square_frame_centre(){
+  uint8_t iterations = 25;
+ int x;
+for (int r=0;r<iterations;r++){  // Repeat Loop here
+  int a=0;
+  int b=7;
+
+  for (x=a;x<=b;x++){ // Draw Outside Frame
+  draw_frame(x, a, b);
+  }
+  delay(100);
+  for (x=a;x<=b;x++){
+    clean_frame(x, a, b);
+  }
+  a++;
+  b--;
+
+  for (int i=0;i<3;i++){ // Draw shrinking frame
+    for (x=a;x<=b;x++){
+      draw_frame(x, a, b);
+    }// end x loop
+    delay(30);
+    for (x=a;x<=b;x++){
+      clean_frame(x, a, b);
+    }
+    a++;
+    b--;
+  }// end i loop
+  
+  a--;
+  b++;
+  
+  for (x=a;x<=b;x++){
+      draw_frame(x, a, b);
+    }// end x loop
+    delay(100);
+  for (x=a;x<=b;x++){
+      clean_frame(x, a, b);
+    }
+  
+  a=a-1;
+  b=b+1;
+  
+  for (int i=0;i<2;i++){ // Draw Growing Frame
+    for (x=a;x<=b;x++){
+      draw_frame(x, a, b);
+    }// end x loop
+    delay(30);
+    for (x=a;x<=b;x++){
+      clean_frame(x, a, b);
+    }
+    a--;
+    b++;
+  }// end i loop
+
+for (x=a;x<=b;x++){ // Draw Outside Frame
+  draw_frame(x, a, b);
+  }
+  delay(100);
+
+}// end r repeat loop
+  clean();
+} //End square_frame_centre
+
+void draw_snake(int ii,int iiterations,int aa, int bb, int cc, int dd, int ee, int ff){;
+
+LED(7,aa,bb,0,15,0);
+LED(7,aa+1,bb,0,15,0);
+LED(7,aa+1,bb+1,0,15,0);
+LED(7,aa,bb+1,0,15,0);
+if (ii>iiterations/3){
+LED(7,cc,dd,0,0,15);
+LED(7,cc+1,dd,0,0,15);
+LED(7,cc+1,dd+1,0,0,15);
+LED(7,cc,dd+1,0,0,15);
+}
+if (ii>iiterations/3*2){
+LED(7,ee,ff,15,0,0);
+LED(7,ee+1,ff,15,0,0);
+LED(7,ee+1,ff+1,15,0,0);
+LED(7,ee,ff+1,15,0,0);
+}}// end draw_snake
+
+void snakes(){
+  uint8_t iterations = 150;
+int delayTime = 60; // change this variable to slow down or speed up animation
+int a = random(1,3);
+int b = random(1,3);
+int c = random(3,5);
+int d = random(3,5);
+int e = random(5,7);
+int f = random(5,7);
+for (int i=0;i<iterations;i++){ 
+  for(int x=0;x<8;x++){  //Clear level 7
+    for(int y=0;y<8;y++){
+      LED(7,x,y,0,0,0);
+    }}
+  a = a + map(random (3),0,2,-1,1);
+  c = c + map(random (3),0,2,-1,1);
+  e = e + map(random (3),0,2,-1,1);
+  a = constrain (a,0,5);
+  c = constrain (c,0,5);
+  e = constrain (e,0,5);
+    draw_snake(i,iterations,a,b,c,d,e,f);
+    shift_all_layers(-1);   // shift all levels down 1
+  delay(delayTime);
+  b = b + map(random (3),0,2,-1,1);
+  d = d + map(random (3),0,2,-1,1);
+  f = f + map(random (3),0,2,-1,1);
+  b = constrain (b,0,5);
+  d = constrain (d,0,5);
+  f = constrain (f,0,5);
+    draw_snake(i,iterations,a,b,c,d,e,f);
+    shift_all_layers(-1);   // shift all levels down 1
+  delay(delayTime);
+  clean();
+}}// End Snake
+
+void cleanWave(int rowNo, int lay1, int lay2, int lay3, int lay4){
+  
+  LED(lay1, 0, rowNo, 0,0,0);
+  LED(lay2, 1, rowNo, 0,0,0);
+  LED(lay3, 2, rowNo, 0,0,0);
+  LED(lay4, 3, rowNo, 0,0,0);
+  LED(lay4, 4, rowNo, 0,0,0);
+  LED(lay3, 5, rowNo, 0,0,0);
+  LED(lay2, 6, rowNo, 0,0,0);
+  LED(lay1, 7, rowNo, 0,0,0);
+  
+}// End halfWave
+
+void halfWave(int rowNo, int lay1, int lay2, int lay3, int lay4){
+  
+  LED(lay1, 0, rowNo, globalRed, globalGreen, globalBlue);
+  LED(lay2, 1, rowNo, globalRed, globalGreen, globalBlue);
+  LED(lay3, 2, rowNo, globalRed, globalGreen, globalBlue);
+  LED(lay4, 3, rowNo, globalRed, globalGreen, globalBlue);
+  LED(lay4, 4, rowNo, globalRed, globalGreen, globalBlue);
+  LED(lay3, 5, rowNo, globalRed, globalGreen, globalBlue);
+  LED(lay2, 6, rowNo, globalRed, globalGreen, globalBlue);
+  LED(lay1, 7, rowNo, globalRed, globalGreen, globalBlue);
+  
+}// End halfWave
+
+void defineWave(byte rowSel1, byte rowSel2, byte rowSel3, byte rowSel4){  // 
+  
+  byte waveForms[21][4] = {
+    { 0, 0, 0, 0},  // 0 Start
+    { 0, 0, 0, 1},  // 1
+    { 0, 0, 1, 2},  // 2
+    { 0, 1, 2, 3},  // 3
+    { 0, 1, 3, 4},  // 4
+    { 0, 2, 4, 5},  // 5
+    { 0, 2, 4, 6},  // 6
+    { 0, 3, 5, 7},  // 7 Loop from here
+    { 1, 3, 4, 6},  // 8
+    { 2, 3, 4, 5},  // 9
+    { 3, 3, 3, 4},  // 10
+    { 4, 4, 4, 3},  // 11
+    { 5, 4, 3, 2},  // 12
+    { 6, 4, 3, 1},  // 13
+    { 7, 4, 2, 0},  // 14
+    { 6, 4, 3, 1},  // 15
+    { 5, 4, 3, 2},  // 16
+    { 4, 4, 4, 3},  // 17
+    { 3, 3, 3, 4},  // 18
+    { 2, 3, 4, 5},  // 19
+    { 1, 3, 4, 6}   // 20  Loop back to 7
+    };
+  
+  
+   // first wave 
+   halfWave (0, waveForms[rowSel1][0], waveForms[rowSel1][1], waveForms[rowSel1][2], waveForms[rowSel1][3]);
+   halfWave (1, waveForms[rowSel2][0], waveForms[rowSel2][1], waveForms[rowSel2][2], waveForms[rowSel2][3]);
+   halfWave (2, waveForms[rowSel3][0], waveForms[rowSel3][1], waveForms[rowSel3][2], waveForms[rowSel3][3]);
+   halfWave (3, waveForms[rowSel4][0], waveForms[rowSel4][1], waveForms[rowSel4][2], waveForms[rowSel4][3]);
+   halfWave (4, waveForms[rowSel4][0], waveForms[rowSel4][1], waveForms[rowSel4][2], waveForms[rowSel4][3]);
+   halfWave (5, waveForms[rowSel3][0], waveForms[rowSel3][1], waveForms[rowSel3][2], waveForms[rowSel3][3]);
+   halfWave (6, waveForms[rowSel2][0], waveForms[rowSel2][1], waveForms[rowSel2][2], waveForms[rowSel2][3]);
+   halfWave (7, waveForms[rowSel1][0], waveForms[rowSel1][1], waveForms[rowSel1][2], waveForms[rowSel1][3]);
+   
+   delay (50);
+   
+   cleanWave (0, waveForms[rowSel1][0], waveForms[rowSel1][1], waveForms[rowSel1][2], waveForms[rowSel1][3]);
+   cleanWave (1, waveForms[rowSel2][0], waveForms[rowSel2][1], waveForms[rowSel2][2], waveForms[rowSel2][3]);
+   cleanWave (2, waveForms[rowSel3][0], waveForms[rowSel3][1], waveForms[rowSel3][2], waveForms[rowSel3][3]);
+   cleanWave (3, waveForms[rowSel4][0], waveForms[rowSel4][1], waveForms[rowSel4][2], waveForms[rowSel4][3]);
+   cleanWave (4, waveForms[rowSel4][0], waveForms[rowSel4][1], waveForms[rowSel4][2], waveForms[rowSel4][3]);
+   cleanWave (5, waveForms[rowSel3][0], waveForms[rowSel3][1], waveForms[rowSel3][2], waveForms[rowSel3][3]);
+   cleanWave (6, waveForms[rowSel2][0], waveForms[rowSel2][1], waveForms[rowSel2][2], waveForms[rowSel2][3]);
+   cleanWave (7, waveForms[rowSel1][0], waveForms[rowSel1][1], waveForms[rowSel1][2], waveForms[rowSel1][3]);
+
+} // /end defineWave
+
+
+
+void wave(){
+  
+  byte repeatTimes = 5; // number of time to repeat wave
+  
+  // sart wave Form
+  
+  globalRed = rand()%16;
+  globalGreen = rand()%16;
+  globalBlue = rand()%16;
+  
+  // start wave
+  defineWave(0,0,0,0);  
+  defineWave(0,0,0,1);  
+  defineWave(0,0,1,2);  
+  defineWave(0,1,2,3);  
+  defineWave(1,2,3,4);  
+  defineWave(2,3,4,5);  
+  defineWave(3,4,5,6);  
+  defineWave(4,5,6,7);  
+  
+  for (int x=0;x<repeatTimes;x++){
+    for (int y=0;y<2;y++){  // number of times to repeat wave in same colour
+      for (int i=8;i<21;i++){
+        
+    defineWave(i-3,i-2,i-1,i);
+    
+      }// end first wave
+    }// end second (y) wave
+    
+    globalRed = rand()%16;
+    globalGreen = rand()%16;
+    globalBlue = rand()%16;
+ 
+  }// end Repeat
+  clean();
+}// End Wave
