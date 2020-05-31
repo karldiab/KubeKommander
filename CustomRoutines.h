@@ -415,17 +415,12 @@ void rain(){//****rainVersionTwo****rainVersionTwo****rainVersionTwo****rainVers
     zz[addr]=random(16);     
   }
   start=millis();
-  while(millis()-start<(2000*pow(2,3))){
-  //wipe_out();
+  while(millis()-start<(20000)){
   //for(addr=0; addr<leds; addr++)
   //LED(zold[addr], xold[addr], yold[addr], 0, 0, 0);
 if(ledcolor<200){
   for(addr=0; addr<leds; addr++){
     LED(zold[addr], xold[addr], yold[addr], 0, 0, 0);
-//  Serial.println(z[addr]);
-//  Serial.println(x[addr]);
-//  Serial.println(y[addr]);
-//  Serial.println();
   if(z[addr]>=7)
   LED(z[addr], x[addr], y[addr], 0, 5, 15);
   if(z[addr]==6)
@@ -706,3 +701,24 @@ void dancingSphere() {
   }
   clean();
 }
+void testRoutine() {
+    for (int i=0;i<8;i++) {
+    for (int j=0;j<8;j++) {
+      for (int k=0;k<8;k++) {
+        LED(i,j,k,0,0,0);
+        //delay(1);
+      }
+    }
+  }
+  //delay(1000);
+  for (int i=0;i<8;i++) {
+    for (int j=0;j<8;j++) {
+      for (int k=0;k<8;k++) {
+        LED(i,j,k,0,15,15);
+        //delay(1);
+      }
+    }
+  }
+  //delay(1000);
+}
+

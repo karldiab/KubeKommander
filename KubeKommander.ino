@@ -4,11 +4,13 @@
 #define NORMALMODE 0
 #define MUSICMODE 1
 #define SLAVEMODE 2
+#define SINGLE_LED_MICROSECONDS_DELAY 100
+#define BIG_COMMAND_MICROSECONDS_DELAY 2000
 
 #define YPLAIN 1
 #define XPLAIN 2
 #define ZPLAIN 3
-byte displayMode = MUSICMODE;
+byte displayMode = NORMALMODE;
 bool BLEMessageRecieved = false;
 bool BLELEDCommandRecieved = false;
 
@@ -26,6 +28,7 @@ unsigned int getLEDNumber(unsigned int z, unsigned int x, unsigned int y);
 void clean();
 unsigned long start; //for a millis timer to cycle through the animations
 int globalRed, globalGreen, globalBlue;
+int nextRoutine;
 
 #include "DefaultRoutines.h"
 #include "CustomRoutines.h"
@@ -173,34 +176,32 @@ void (*routines[NUMBEROFROUTINES])() = {
   wave //17
 };
 void loop() {
-//  switch (displayMode) {
-//    case NORMALMODE:
-//      clean();
-//      (*routines[random(0,NUMBEROFROUTINES)])();
-//      clean();
-//    break;
-//    case MUSICMODE:
-//      clean();
-//      musicModeLoop();
-//      clean();
-//    break;
-//    case SLAVEMODE:
-//      return;
-//    break;
-//  }
-  int nextRoutine = random(0,NUMBEROFROUTINES);
-  clean();
-  delay(20);
-  #ifdef DEBUG
-    Serial.print("Starting routine ");
-    Serial.print(nextRoutine);
-    Serial.print(". Total runtime: ");
-    Serial.print(millis()/1000);
-    Serial.println("s.");
-  #endif
-  (*routines[nextRoutine])();
-  clean();
-  delay(20);
+  switch (displayMode) {
+    case NORMALMODE:
+      nextRoutine = random(0,NUMBEROFROUTINES);
+      clean();
+      delay(20);
+      #ifdef DEBUG
+        Serial.print("Starting routine ");
+        Serial.print(nextRoutine);
+        Serial.print(". Total runtime: ");
+        Serial.print(millis()/1000);
+        Serial.println("s.");
+      #endif
+      (*routines[nextRoutine])();
+      clean();
+      delay(20);
+    break;
+    case MUSICMODE:
+      clean();
+      musicModeLoop();
+      clean();
+    break;
+    case SLAVEMODE:
+      return;
+    break;
+  }
+// testRoutine();
 //  sinwaveTwo();
 //  folder();
 //  fireworks();
@@ -273,7 +274,9 @@ void LED(int z,int x,int y, byte R, byte G, byte B) {
     Wire.write((B << 4) + (LEDNumber >> 8));
     Wire.write(LEDNumber);
     Wire.endTransmission();
+    delayMicroseconds(SINGLE_LED_MICROSECONDS_DELAY);
 }
+
 unsigned long truncsendTimer = millis();
 unsigned int trunccommandCount = 0;
 void LEDTruncate(int z,int x,int y, byte R, byte G, byte B) {
@@ -307,6 +310,7 @@ void LEDTruncate(int z,int x,int y, byte R, byte G, byte B) {
     Wire.write((B << 4) + (LEDNumber >> 8));
     Wire.write(LEDNumber);
     Wire.endTransmission();
+    delayMicroseconds(SINGLE_LED_MICROSECONDS_DELAY);
 }
 unsigned long LEDNosendTimer = millis();
 unsigned int LEDNocommandCount = 0;
@@ -344,6 +348,7 @@ void LEDNo(int LEDNumber, byte R, byte G, byte B) {
   Wire.write((B << 4) + (LEDNumber >> 8));
   Wire.write(LEDNumber);
   Wire.endTransmission();
+  delayMicroseconds(SINGLE_LED_MICROSECONDS_DELAY);
 }
 unsigned long WCCsendTimer = millis();
 unsigned int WCCcommandCount = 0;
@@ -381,6 +386,7 @@ void LEDWholeCubeChange(byte R, byte G, byte B) {
   Wire.write((B << 4) | B00000010);
   Wire.write(0);
   Wire.endTransmission();
+  delayMicroseconds(BIG_COMMAND_MICROSECONDS_DELAY);
 }
 void LEDPlainChange(byte whichPlain, byte level, byte R, byte G, byte B) {
   if (whichPlain == 0 || whichPlain > 3)
@@ -406,6 +412,7 @@ void LEDPlainChange(byte whichPlain, byte level, byte R, byte G, byte B) {
   Wire.write((B << 4) | (B00001000 + (whichPlain << 1)));
   Wire.write(level);
   Wire.endTransmission();
+  delayMicroseconds(BIG_COMMAND_MICROSECONDS_DELAY);
 }
 //return 512 if x y or z out of bounds
 unsigned int getLEDNumber(unsigned int z, unsigned int x, unsigned int y) {
