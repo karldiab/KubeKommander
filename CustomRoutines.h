@@ -706,3 +706,112 @@ void dancingSphere() {
   }
   clean();
 }
+
+//cameForTheLo
+
+void cameForTheLo() {
+  int iterations = 10;
+  int delayFactor = 100;
+  for (int runs = 0; runs < iterations; runs++) { 
+    makeCube(0,0,0,random(7),random(16),random(16));
+    makeCube(4,4,4,random(7),random (16),random(16));
+    delay(delayFactor);
+    
+    
+    
+    for(int i=0;i<=3;i++){
+      moveCube(i,0,0,random(7),random(16),random(16),true,0);
+      moveCube(4-i,4,4,random(7),random(16),random(16),false,0);
+      delay(delayFactor);
+    }
+    //for(int i=4;i>=1;i--){
+    //  moveCube(i,0,0,random(7),random(16),random(16),false,0);
+    //  delay(random(lowerBound,upperBound));
+    //}
+    for(int i=0;i<=3;i++){
+      moveCube(4,i,0,random(7),random(16),random(16),true,1);
+      moveCube(0,4-i,4,random(7),random(16),random(16),false,1);
+      delay(delayFactor);
+      
+    }
+    for(int i=0;i<=3;i++){
+      moveCube(4,4,i,random(7),random(16),random(16),true,2);
+      moveCube(0,0,4-i,random(7),random(16),random(16),false,2);
+      delay(delayFactor);
+    }
+    
+    for(int i=0;i<=3;i++){
+      extendCube(i,0,0,random(7),random(16),random(16),true,0);
+      extendCube(4-i,4,4,random(7),random(16),random(16),false,0);
+      delay(delayFactor);
+    }
+    
+    for(int i=0;i<=3;i++){
+      moveCube(4,i,0,random(7),random(16),random(16),true,1);
+      moveCube(4,4-i,4,random(7),random(16),random(16),false,1);
+      delay(delayFactor);
+    }
+    
+    for(int i=0;i<=3;i++){
+      moveCube(i,0,0,random(7),random(16),random(16),true,0);
+      moveCube(i,4,4,random(7),random(16),random(16),true,0);
+      moveCube(4-i,4,0,random(7),random(16),random(16),false,0);
+      moveCube(4-i,0,4,random(7),random(16),random(16),false,0);
+      delay(delayFactor);
+    }
+    
+    for(int i=0;i<=3;i++){
+      moveCube(4,i,0,random(7),random(16),random(16),true,1);
+      moveCube(4,4-i,4,random(7),random(16),random(16),false,1);
+      moveCube(0,4,i,random(7),random(16),random(16),true,2);
+      moveCube(0,0,4-i,random(7),random(16),random(16),false,2);
+      delay(delayFactor);
+    }
+    
+    for(int i=0;i<=3;i++){
+      moveCube(i,0,0,random(7),random(16),random(16),true,0);
+      moveCube(i,4,4,random(7),random(16),random(16),true,0);
+      moveCube(4-i,4,0,random(7),random(16),random(16),false,0);
+      moveCube(4-i,0,4,random(7),random(16),random(16),false,0);
+      delay(delayFactor);
+    }
+    
+    for(int i=0;i<=3;i++){
+      moveCube(4,i,0,random(7),random(16),random(16),true,1);
+      moveCube(4,4-i,4,random(7),random(16),random(16),false,1);
+      moveCube(0,4,i,random(7),random(16),random(16),true,2);
+      moveCube(0,0,4-i,random(7),random(16),random(16),false,2);
+      delay(delayFactor);
+    }
+    
+    for(int i=0;i<=3;i++){
+      moveCube(i,0,0,random(7),random(16),random(16),true,0);
+      moveCube(i,4,4,random(7),random(16),random(16),true,0);
+      moveCube(4-i,4,0,random(7),random(16),random(16),false,0);
+      moveCube(4-i,0,4,random(7),random(16),random(16),false,0);
+      delay(delayFactor);
+    }
+    
+    for(int i=0;i<=3;i++){
+      moveCube(4,i,0,random(7),random(16),random(16),true,1);
+      moveCube(4,4-i,4,random(7),random(16),random(16),false,1);
+      moveCube(0,4,i,random(7),random(16),random(16),true,2);
+      moveCube(0,0,4-i,random(7),random(16),random(16),false,2);
+      delay(delayFactor);
+    }
+    
+    
+    for(int i=0;i<=3;i++){
+      moveCube(4-i,0,4,random(7),random(16),random(16),false,0);
+      moveCube(i,4,4,random(7),random(16),random(16),true,0);
+      delay(delayFactor);
+    }
+    
+    for(int i=0;i<=3;i++){
+      moveCube(0,0,4-i,random(7),random(16),random(16),false,2);
+      moveCube(4,4,i,random(7),random(16),random(16),true,2);
+      delay(delayFactor);
+    }
+  }
+}
+

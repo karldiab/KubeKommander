@@ -1932,8 +1932,3 @@ void wave(){
   }// end Repeat
   clean();
 }// End Wave
-
-
-
-
-

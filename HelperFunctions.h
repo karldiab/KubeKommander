@@ -595,3 +595,141 @@ void drawTinyCenterCube(byte red, byte green, byte blue) {
   LED (4,4,3,red,green,blue);
   LED (4,4,4,red,green,blue);
 }
+
+//cameForTheLo Helpers
+
+void makeCube(byte xx,byte yy, byte zz,byte R,byte G, byte B){
+  for(int x=xx;x<=xx+3;x++){
+  for(int y=yy;y<=yy+3;y++){
+    for(int z=zz;z<=zz+3;z++){
+      LED(x,y,z,R,G,B);
+     }
+   }
+ }
+
+}
+void moveCube(byte xx,byte yy, byte zz,byte R,byte G, byte B, bool movingForward, byte axis){
+  int delayFactor = 1;
+  //moving up columns
+  if (axis==0){
+    if (movingForward){
+       for(int y=yy;y<=yy+3;y++){
+         for(int z=zz;z<=zz+3;z++){
+          LED(xx+4,y,z,R,G,B);
+          delay(delayFactor);
+          LED(xx,y,z,0,0,0);
+          delay(delayFactor);
+         }
+       }
+    } else {
+      for(int y=yy;y<=yy+3;y++){
+         for(int z=zz;z<=zz+3;z++){
+          LED(xx-1,y,z,R,G,B);
+          delay(delayFactor);
+          LED(xx+3,y,z,0,0,0);
+          delay(delayFactor);
+         }
+       }
+      
+    }
+  }
+ //moving forwards 
+  if (axis==1){
+    if (movingForward){
+       for(int x=xx;x<=xx+3;x++){
+         for(int z=zz;z<=zz+3;z++){
+          LED(x,yy+4,z,R,G,B);
+          delay(delayFactor);
+          LED(x,yy,z,0,0,0);
+          delay(delayFactor);
+         }
+       }
+    } else {
+      for(int x=xx;x<=xx+3;x++){
+         for(int z=zz;z<=zz+3;z++){
+          LED(x,yy-1,z,R,G,B);
+          delay(delayFactor);
+          LED(x,yy+3,z,0,0,0);
+          delay(delayFactor);
+         }
+       }
+      
+    }
+  }
+   
+  //moving across
+   if (axis==2){
+    if (movingForward){
+       for(int x=xx;x<=xx+3;x++){
+         for(int y=yy;y<=yy+3;y++){
+          LED(x,y,zz+4,R,G,B);
+          delay(delayFactor);
+          LED(x,y,zz,0,0,0);
+          delay(delayFactor);
+         }
+       }
+    } else {
+      for(int x=xx;x<=xx+3;x++){
+         for(int y=yy;y<=yy+3;y++){
+          LED(x,y,zz-1,R,G,B);
+          delay(delayFactor);
+          LED(x,y,zz+3,0,0,0);
+          delay(delayFactor);
+         }
+       }
+      
+    }
+  }
+
+}
+void extendCube(byte xx,byte yy, byte zz,byte R,byte G, byte B, bool movingForward, byte axis){
+  if (axis==0){
+    if (movingForward){
+       for(int y=yy;y<=yy+3;y++){
+         for(int z=zz;z<=zz+3;z++){
+          LED(xx+4,y,z,R,G,B);
+         }
+       }
+    } else {
+      for(int y=yy;y<=yy+3;y++){
+         for(int z=zz;z<=zz+3;z++){
+          LED(xx-1,y,z,R,G,B);
+         }
+       }
+      
+    }
+  }
+  if (axis==1){
+    if (movingForward){
+       for(int x=xx;x<=xx+3;x++){
+         for(int z=zz;z<=zz+3;z++){
+          LED(x,yy+4,z,R,G,B);
+          }
+       }
+    } else {
+      for(int x=xx;x<=xx+3;x++){
+         for(int z=zz;z<=zz+3;z++){
+          LED(x,yy-1,z,R,G,B);
+         }
+       }
+      
+    }
+  }
+   if (axis==2){
+    if (movingForward){
+       for(int x=xx;x<=xx+3;x++){
+         for(int y=yy;y<=yy+3;y++){
+          LED(x,y,zz+4,R,G,B);
+           }
+       }
+    } else {
+      for(int x=xx;x<=xx+3;x++){
+         for(int y=yy;y<=yy+3;y++){
+          LED(x,y,zz-1,R,G,B);
+            }
+       }
+      
+    }
+  }
+
+}
