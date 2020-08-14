@@ -1447,6 +1447,7 @@ void fireworks() {
         particles[f][2] -= gravity;
 
         LED(particles[f][2], particles[f][0], particles[f][1], (random(16)), (random(16)), (random(16)));
+        delay(5);
         lastpart[f][2] = particles[f][2];
         lastpart[f][0] = particles[f][0];
         lastpart[f][1] = particles[f][1];
@@ -1456,6 +1457,7 @@ void fireworks() {
       delay(40);
       for (f = 0; f < n; f++) {
         LED(lastpart[f][2], lastpart[f][0], lastpart[f][1], 0, 0, 0);
+        delay(10);
       }
 
     }
